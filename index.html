@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Internal info hub — մակետ</title>
+<style>
+  :root {
+    --navy: #002050;
+    --blue: #0f6cbd;
+    --blue-soft: #deecf9;
+    --text: #323130;
+    --muted: #605e5c;
+    --line: #e1dfdd;
+    --page: #f3f2f1;
+    --card: #ffffff;
+    --nav-hover: #edebe9;
+    --green-bg: #dff6dd; --green: #107c10;
+    --amber-bg: #fff4ce; --amber: #835b00;
+    --red-bg: #fde7e9;   --red: #a4262c;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: "Segoe UI", "Segoe UI Web", system-ui, sans-serif; color: var(--text); background: #d8d6d4; font-size: 14px; }
+  button { font: inherit; cursor: pointer; }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* ---- outside the CRM frame: studio bar ---- */
+  .studio { max-width: 1480px; margin: 0 auto; padding: 12px 16px 24px; }
+
+  /* ---- the CRM frame ---- */
+  .app { background: var(--page); border: 1px solid #a19f9d; border-radius: 4px; box-shadow: 0 8px 28px rgba(0,0,0,.22); overflow: hidden; height: 860px; display: grid; grid-template-rows: 48px 1fr; position: relative; }
+  .topbar { background: var(--navy); color: #fff; display: flex; align-items: center; gap: 14px; padding: 0 12px; }
+  .topbar .waffle { background: none; border: 0; color: #fff; padding: 6px; display: grid; }
+  .topbar .app-name { font-weight: 600; font-size: 15px; white-space: nowrap; }
+  .topbar .gsearch { flex: 1; max-width: 520px; margin: 0 auto; position: relative; }
+  .topbar .gsearch input { width: 100%; height: 32px; border: 0; border-radius: 3px; padding: 0 12px 0 34px; font: inherit; background: #fff; color: var(--text); }
+  .topbar .gsearch svg { position: absolute; left: 10px; top: 7px; color: var(--muted); }
+  .topbar .right { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #5c7fb8; display: grid; place-items: center; font-size: 11px; font-weight: 600; }
+
+  .body { display: grid; grid-template-columns: 236px 1fr; min-height: 0; }
+  .body.with-chat { grid-template-columns: 236px 1fr 372px; }
+
+  /* sitemap */
+  .nav { background: #faf9f8; border-right: 1px solid var(--line); padding: 8px 0; overflow-y: auto; }
+  .nav h4 { margin: 12px 16px 4px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .nav button { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: none; border: 0; border-left: 3px solid transparent; padding: 9px 16px 9px 13px; color: var(--text); }
+  .nav button:hover { background: var(--nav-hover); }
+  .nav button.active { background: var(--nav-hover); border-left-color: var(--blue); font-weight: 600; }
+
+  /* centre column */
+  .main { overflow-y: auto; min-width: 0; }
+  .cmdbar { background: #fff; border-bottom: 1px solid var(--line); padding: 0 12px; height: 44px; display: flex; align-items: center; gap: 4px; position: sticky; top: 0; z-index: 3; }
+  .cmdbar button { background: none; border: 0; padding: 7px 10px; display: flex; align-items: center; gap: 6px; border-radius: 3px; color: var(--text); }
+  .cmdbar button:hover { background: var(--nav-hover); }
+  .cmdbar .sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+  .content { padding: 20px 24px 40px; }
+
+  .hero { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 22px 24px; }
+  .hero h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+  .hero p { margin: 0 0 14px; color: var(--muted); }
+  .hero .searchbox { position: relative; }
+  .hero .searchbox input { width: 100%; height: 46px; border: 1px solid #8a8886; border-radius: 3px; padding: 0 14px 0 44px; font: inherit; font-size: 15px; }
+  .hero .searchbox input:focus { outline: 2px solid var(--blue); outline-offset: -1px; border-color: transparent; }
+  .hero .searchbox svg { position: absolute; left: 14px; top: 14px; color: var(--muted); width: 20px; height: 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { background: #fff; border: 1px solid #c8c6c4; border-radius: 16px; padding: 5px 12px; font-size: 13px; }
+  .chip:hover { background: var(--blue-soft); border-color: var(--blue); }
+
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 10px; }
+  .section-title h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .section-title span { color: var(--muted); font-size: 12.5px; }
+
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; color: var(--muted); }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.active { color: var(--text); font-weight: 600; border-bottom-color: var(--blue); }
+
+  .group-label { font-size: 12px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .03em; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 11px 12px; display: grid; gap: 6px; }
+  .tile:hover { border-color: #a19f9d; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+  .tile .row { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .tile .name { font-weight: 600; line-height: 1.3; }
+  .tile .desc { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+  .tile .meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .tile .actions { display: flex; gap: 6px; margin-top: 2px; }
+  .link { background: none; border: 0; padding: 0; color: var(--blue); font-size: 12.5px; }
+  .link:hover { text-decoration: underline; }
+  .star { background: none; border: 0; padding: 2px; color: #a19f9d; display: grid; }
+  .star:hover, .star.on { color: #c19c00; }
+  .star.on svg { fill: #c19c00; }
+
+  .badge { font-size: 11.5px; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+  .b-site { background: var(--blue-soft); color: #004578; }
+  .b-intranet { background: var(--green-bg); color: #0b5a0b; }
+  .b-new { background: var(--green-bg); color: var(--green); }
+  .b-today { background: var(--red-bg); color: var(--red); }
+  .b-sample { background: #edebe9; color: var(--muted); }
+  .b-info { background: var(--blue-soft); color: #004578; }
+  .b-expired { background: var(--red-bg); color: var(--red); font-weight: 600; }
+  .tile.expired { border-color: #e6b8bb; }
+  .dd-expired { color: var(--red); font-weight: 600; }
+
+  .newgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .empty { background: #fff; border: 1px dashed #c8c6c4; border-radius: 4px; padding: 28px; text-align: center; color: var(--muted); }
+
+  /* ---- assistant dock ---- */
+  .chat { background: #fff; border-left: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr auto auto; min-height: 0; }
+  .chat-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .chat-head .t { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .ai-badge { background: linear-gradient(135deg, #0f6cbd, #5b5fc7); color: #fff; font-size: 10.5px; padding: 1px 6px; border-radius: 3px; }
+  .chat-head button { background: none; border: 0; padding: 4px 8px; border-radius: 3px; color: var(--muted); }
+  .chat-head button:hover { background: var(--nav-hover); }
+  .msgs { overflow-y: auto; padding: 14px; display: grid; gap: 12px; align-content: start; }
+  .msg { max-width: 92%; padding: 9px 12px; border-radius: 6px; line-height: 1.5; }
+  .msg.user { justify-self: end; background: var(--blue); color: #fff; }
+  .msg.bot { background: #f3f2f1; }
+  .msg.bot ol { margin: 6px 0 0; padding-left: 18px; }
+  .src { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e1dfdd; font-size: 12.5px; color: var(--muted); }
+  .src .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .src a { color: var(--blue); text-decoration: none; }
+  .src a:hover { text-decoration: underline; }
+  .fb { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .fb button { background: #fff; border: 1px solid #c8c6c4; border-radius: 12px; padding: 2px 10px; font-size: 12px; }
+  .fb button:hover { background: var(--blue-soft); border-color: var(--blue); }
+  .fb button.done { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .suggest { padding: 0 14px 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .suggest button { background: #fff; border: 1px solid #c8c6c4; border-radius: 14px; padding: 4px 10px; font-size: 12.5px; text-align: left; }
+  .suggest button:hover { background: var(--blue-soft); border-color: var(--blue); }
+  .composer { display: flex; gap: 8px; padding: 10px 14px 14px; border-top: 1px solid var(--line); }
+  .composer input { flex: 1; height: 36px; border: 1px solid #8a8886; border-radius: 3px; padding: 0 10px; font: inherit; }
+  .composer input:focus { outline: 2px solid var(--blue); outline-offset: -1px; border-color: transparent; }
+  .composer button { background: var(--blue); color: #fff; border: 0; border-radius: 3px; padding: 0 14px; }
+  .composer button:hover { background: #115ea3; }
+
+  .fab { position: absolute; right: 22px; bottom: 22px; width: 54px; height: 54px; border-radius: 50%; border: 0; color: #fff; background: linear-gradient(135deg, #0f6cbd, #5b5fc7); box-shadow: 0 4px 14px rgba(0,0,0,.3); font-weight: 700; z-index: 5; }
+
+
+  /* ---- detail / record view ---- */
+  .name-btn { background: none; border: 0; padding: 0; text-align: left; font: inherit; font-weight: 600; line-height: 1.3; color: var(--text); }
+  .name-btn:hover { color: var(--blue); text-decoration: underline; }
+  .tile .actions a.link { text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .tile .actions a.link:hover { text-decoration: underline; }
+  .tile .actions svg.i { width: 13px; height: 13px; }
+  .crumbs { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12.5px; margin-bottom: 12px; flex-wrap: wrap; }
+  .doc { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; max-width: 860px; }
+  .doc h2 { margin: 0 0 8px; font-size: 22px; font-weight: 600; line-height: 1.3; }
+  .doc .meta-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .doc .meta-row .grow { flex: 1; }
+  .doc h3 { font-size: 14px; font-weight: 600; margin: 20px 0 6px; }
+  .doc p { margin: 0 0 8px; line-height: 1.6; }
+  .doc ol, .doc ul { margin: 0 0 8px; padding-left: 22px; line-height: 1.65; }
+  .doc .intro { font-size: 15px; }
+  .doc .samplenote { color: var(--muted); font-size: 12.5px; margin-top: 22px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .mail { border: 1px solid var(--line); background: #faf9f8; border-radius: 4px; padding: 10px 14px; margin: 0 0 16px; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+  .mail dt { color: var(--muted); }
+  .mail dd { margin: 0; }
+  .srcbox { border: 1px solid #a9cdee; background: #f4f9fd; border-radius: 4px; padding: 16px 18px; margin-top: 14px; }
+  .srcbox .t { font-weight: 600; margin-bottom: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: #fff; text-decoration: none; padding: 9px 16px; border-radius: 3px; font-weight: 600; }
+  .btn:hover { background: #115ea3; }
+  .url { font-family: Consolas, "Courier New", monospace; font-size: 12px; color: var(--muted); word-break: break-all; margin-top: 10px; }
+  .srcbox .note { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+  .related { margin-top: 22px; }
+
+  /* ---- end-of-day digest ---- */
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 14px 18px; margin-bottom: 10px; line-height: 1.55; }
+  .panel p { margin: 0 0 12px; }
+  .pain { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; margin-bottom: 10px; display: grid; gap: 8px; }
+  .pain ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .top { display: flex; align-items: center; gap: 10px; }
+  .top .grow { flex: 1; }
+  .rank { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-soft); color: #004578; display: grid; place-items: center; font-weight: 600; font-size: 12px; flex-shrink: 0; }
+  .meter { height: 6px; background: #edebe9; border-radius: 3px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--blue); border-radius: 3px; }
+  .ai-note { background: #f4f4fb; border-left: 3px solid #5b5fc7; padding: 8px 12px; font-size: 13px; border-radius: 0 3px 3px 0; }
+  .plan-row { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
+  .plan-row + .plan-row { margin-top: 0; }
+  .plan-min { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 20px; font-weight: 600; line-height: 1.3; }
+  .stat span { color: var(--muted); font-size: 12.5px; }
+  .bar-row { display: grid; grid-template-columns: minmax(150px, 230px) 1fr 30px; gap: 12px; align-items: center; margin-top: 10px; }
+  .tablewrap { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+  table.team { width: 100%; border-collapse: collapse; }
+  table.team th, table.team td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  table.team th { color: var(--muted); font-weight: 600; font-size: 12px; background: #faf9f8; }
+  table.team tr:last-child td { border-bottom: 0; }
+  button.btn { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+  button.btn.done { background: var(--green); }
+  .ai-badge { vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 20 20"><path d="M3 9.5 10 3l7 6.5V17h-5v-5H8v5H3z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 20 20"><path d="M3 6l7-3 7 3v8l-7 3-7-3z M3 6l7 3 7-3 M10 9v8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 20 20"><path d="M4 5h12M4 10h12M4 15h8"/></symbol>
+  <symbol id="i-mega" viewBox="0 0 20 20"><path d="M3 8v4h3l6 4V4L6 8z M14.5 8a3 3 0 010 4"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 20 20"><path d="M3 5h14v10H3z M3 5l7 6 7-6"/></symbol>
+  <symbol id="i-sys" viewBox="0 0 20 20"><path d="M3 4h14v9H3z M7 16h6 M10 13v3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 20 20"><path d="M10 3l2.1 4.4 4.9.7-3.5 3.4.8 4.8L10 13.9 5.7 16.3l.8-4.8L3 8.1l4.9-.7z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 20 20"><path d="M16 10a6 6 0 11-2-4.5 M16 3v4h-4"/></symbol>
+  <symbol id="i-link" viewBox="0 0 20 20"><path d="M8 12l4-4 M7 9L5.5 10.5a3 3 0 004.2 4.2L11 13 M13 11l1.5-1.5a3 3 0 00-4.2-4.2L9 7"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 20 20"><path d="M3 3h5v5H3z M12 3h5v5h-5z M3 12h5v5H3z M12 12h5v5h-5z"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 20 20"><path d="M8 4H4v12h12v-4 M11 3h6v6 M17 3l-8 8"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 20 20"><path d="M4 16V9 M10 16V4 M16 16v-5"/></symbol>
+  <symbol id="i-people" viewBox="0 0 20 20"><circle cx="7" cy="7" r="3"/><path d="M2 16c0-3 2.2-5 5-5s5 2 5 5 M13 4.5a2.5 2.5 0 010 5 M15 11.5c1.7.6 3 2.2 3 4.5"/></symbol>
+</svg>
+
+<div class="studio">
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <button class="waffle" aria-label="Ծրագրեր"><svg class="i"><use href="#i-grid"/></svg></button>
+      <span class="app-name">Internal info hub</span>
+      <div class="gsearch">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input id="q-top" type="search" placeholder="Որոնել ամբողջ հարթակում" aria-label="Որոնել" />
+      </div>
+      <div class="right"><span class="avatar">ԱՄ</span></div>
+    </header>
+
+    <div class="body with-chat" id="body">
+      <nav class="nav" aria-label="Բաժիններ">
+        <h4>Հարթակ</h4>
+        <button data-view="home" class="active"><svg class="i"><use href="#i-home"/></svg>Գլխավոր</button>
+        <h4>Բաժիններ</h4>
+        <button data-view="products"><svg class="i"><use href="#i-box"/></svg>Պրոդուկտներ/ծառայություններ</button>
+        <button data-view="procedures"><svg class="i"><use href="#i-list"/></svg>Ընթացակարգեր</button>
+        <button data-view="campaigns"><svg class="i"><use href="#i-mega"/></svg>Արշավներ/առաջարկներ</button>
+        <button data-view="internal"><svg class="i"><use href="#i-mail"/></svg>Ներքին նամակագրություններ/ որոշումներ</button>
+        <button data-view="systems"><svg class="i"><use href="#i-sys"/></svg>Համակարգեր/տեխնիկական խնդիրներ</button>
+        <h4>Իմ էջը</h4>
+        <button data-view="saved"><svg class="i"><use href="#i-star"/></svg>Պահպանվածներ</button>
+        <button data-view="mydigest"><svg class="i"><use href="#i-chart"/></svg>Օրվա ամփոփում</button>
+        <h4>Ղեկավարի համար</h4>
+        <button data-view="team"><svg class="i"><use href="#i-people"/></svg>Թիմի ամփոփում</button>
+      </nav>
+
+      <section class="main">
+        <div class="cmdbar">
+          <button id="cmd-refresh"><svg class="i"><use href="#i-refresh"/></svg>Թարմացնել</button>
+          <span class="sep"></span>
+          <button><svg class="i"><use href="#i-link"/></svg>Պատճենել հղումը</button>
+        </div>
+        <div class="content" id="content"></div>
+      </section>
+
+      <aside class="chat" id="chat" aria-label="AI Assistant">
+        <div class="chat-head">
+          <div class="t"><span class="ai-badge">AI</span> Assistant</div>
+          <button id="chat-min" title="Փակել" aria-label="Փակել Assistant-ը">–</button>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="suggest" id="suggest"></div>
+        <form class="composer" id="composer">
+          <input id="chat-input" placeholder="Հարցրեք որևէ բան…" aria-label="Հարց Assistant-ին" autocomplete="off" />
+          <button type="submit">Ուղարկել</button>
+        </form>
+      </aside>
+    </div>
+
+    <button class="fab" id="fab" hidden aria-label="Բացել Assistant-ը">AI</button>
+  </div>
+</div>
+
+
+<script>
+const CATS = {
+  cards: "Քարտեր", loans: "Վարկեր", accounts: "Հաշիվներ",
+  transfers: "Փոխանցումներ", savings: "Խնայողություններ", digital: "Թվային ծառայություններ",
+};
+const SECTION_NAMES = {
+  products: "Պրոդուկտներ/ծառայություններ", procedures: "Ընթացակարգեր", campaigns: "Արշավներ/առաջարկներ",
+  internal: "Ներքին նամակագրություններ/որոշումներ", systems: "Համակարգեր/տեխնիկական խնդիրներ",
+};
+const SRC = { site: ["Կայք", "b-site"], hub: ["Ներքին տեղեկատվություն", "b-intranet"] };
+
+// Product names follow the site's own menu (ameriabank.am/en/personal).
+const P = (cat, group, names) => names.map((name) => ({ kind: "product", section: "products", cat, group, name, src: "site" }));
+const PRODUCTS = [
+  ...P("cards", "", ["Վճարային քարտեր", "Թվային քարտ", "Նվեր քարտ", "Ուսանողական քարտ", "Ameria Pension քարտ", "Քարտի առավելություններ"]),
+  ...P("loans", "Սպառողական վարկեր", ["Սպառողական վարկ", "Overdraft", "Վարկային գիծ", "Սպառողական ֆինանսավորում", "Առցանց սպառողական ֆինանսավորում"]),
+  ...P("loans", "Ապահովված վարկեր", ["Գրավով ապահովված սպառողական վարկ", "Անշարժ գույքով ապահովված սպառողական վարկերի վերաֆինանսավորում", "Ներդրումային վարկ", "Էներգաարդյունավետ վարկ", "Էկո, մոդուլային և կապսուլային տներ"]),
+  ...P("loans", "Ավտովարկեր", ["MyCar.am", "Ավտովարկ առանց բանկ այցելելու", "Ավտովարկ առաջնային շուկայի համար", "Ավտովարկ երկրորդային շուկայի համար", "Աշխատեք Ձեր սեփական ավտոմեքենայով", "Առցանց ավտովարկ առանց եկամտի ստուգման"]),
+  ...P("loans", "Հիփոթեք", ["MyHome.am", "Առցանց հիփոթեքային վարկ առաջնային և երկրորդային շուկայի համար", "Հիփոթեքային վարկ առաջնային շուկայի համար", "Հիփոթեքային վարկ սփյուռքի համար", "Հիփոթեքի վերաֆինանսավորում", "Հիփոթեքային վարկ երկրորդային շուկայի համար", "Առևտրային անշարժ գույքի վարկ", "Արագ հիփոթեք", "Հիփոթեք առանց եկամտի ստուգման", "Վերանորոգման վարկ", "Շինարարական վարկ"]),
+  ...P("accounts", "Փաթեթներ", ["Smart", "Better", "Sector Deals", "Persona փաթեթներ", "Premium", "Partner"]),
+  ...P("accounts", "Հաշիվների տեսակներ", ["Ընթացիկ հաշիվ", "Խնայողական հաշիվ", "Սոցիալական փաթեթի հաշիվ", "Էսկրոու հաշիվ", "Այլ հատուկ հաշիվներ", "Մետաղական հաշիվներ", "Հաշիվներ ՀՀ ոչ քաղաքացիների համար", "Բիզնես հաշիվ"]),
+  ...P("transfers", "", ["Փոխանցումներ հեռախոսահամարով", "Wire փոխանցումներ", "Քարտից քարտ փոխանցումներ", "Stak/MoneyGram", "UBPay", "VISA վճարումներ"]),
+  ...P("savings", "", ["Ameria ավանդ", "Ameria ավանդ երեխաների համար", "Ameria կուտակային ավանդ", "Պարտատոմսեր", "MyInvest"]),
+  ...P("digital", "", ["Անվճար Smart հաշիվ", "MyAmeria", "MyAmeria Star", "MyInvest", "MyPoint", "MyTour", "MyPay", "MyGift", "Առցանց ապահովագրություն"]),
+];
+// Only these two have a description, because only these two were confirmed on the live site.
+const DESC = {
+  "Overdraft": "Քարտային վարկ, որը կարելի է օգտագործել և՛ բանկոմատից կանխիկ ստանալու, և՛ անկանխիկ վճարումների համար։",
+  "Smart": "Փաթեթը ներառում է հաշիվ ՀՀ դրամով և մեկ արտարժույթով, մեկ վճարային քարտ և MyAmeria համակարգը։",
+};
+PRODUCTS.forEach((p, i) => { p.id = "p" + i; if (DESC[p.name]) p.desc = DESC[p.name]; });
+
+// Internal content is placeholder - only the shape (sections, sources, tags) is the point.
+const INFO = [
+  { section: "procedures", name: "Քարտի արգելափակման ընթացակարգ", src: "hub", tag: ["Թարմացվել է", "b-new"], news: true },
+  { section: "procedures", name: "Հաճախորդի նույնականացման ընթացակարգ", src: "hub" },
+  { section: "procedures", name: "Վարկային դիմումի ընդունման ընթացակարգ", src: "hub" },
+  { section: "campaigns", name: "Աշնանային առաջարկ քարտապանների համար", src: "hub", tag: ["Ակտիվ", "b-new"], news: true },
+  { section: "campaigns", name: "Ավանդների նոր պայմանների ներկայացում", src: "hub", tag: ["Նոր", "b-info"] },
+  { section: "campaigns", name: "Ընթացիկ ակցիաների ամփոփ ցանկ", src: "hub", tag: ["Ակտիվ", "b-new"] },
+  { section: "internal", name: "Աշխատանքային ժամերի փոփոխություն", src: "hub", tag: ["Նոր", "b-new"], news: true },
+  { section: "internal", name: "Նոր ընթացակարգի ներդրման հուշագիր", src: "hub" },
+  { section: "internal", name: "Ներքին հրամանների արխիվ", src: "hub" },
+  { section: "systems", name: "Պլանային տեխնիկական աշխատանքներ", src: "hub", tag: ["Այսօր", "b-today"], news: true },
+  { section: "systems", name: "Համակարգ մուտքի խնդրի լուծման քայլեր", src: "hub" },
+  { section: "systems", name: "Հաճախ հանդիպող սխալներ և լուծումներ", src: "hub" },
+  { section: "campaigns", name: "Ամառային առաջարկ քարտապանների համար", src: "hub", tag: ["Ավարտված", "b-expired"], expired: true },
+].map((x, i) => ({ ...x, kind: "info", sample: true, id: "n" + i }));
+
+// Full text of each internal item. The hub is the only source for these, so they open as plain text.
+// Placeholder content: only the structure matters for the mockup, so dates, figures and names
+// are left as [brackets] instead of being invented.
+const ALL_STAFF = "Բոլոր մասնաճյուղեր և կոնտակտային կենտրոն";
+const BODY = [
+  { by: "[Գործառնական բաժին]", intro: "Սույն ընթացակարգը սահմանում է քարտի արգելափակման միասնական կարգը՝ հաճախորդի դիմումի, քարտի կորստի կամ գողության դեպքում։", blocks: [
+    { h: "Երբ է կիրառվում", ul: ["Քարտը կորել կամ գողացվել է։", "Հաճախորդը կասկածում է չթույլատրված գործարքների մասին։", "Հաճախորդը ցանկանում է ժամանակավորապես կասեցնել քարտի օգտագործումը։"] },
+    { h: "Քայլեր", ol: ["Նույնականացրեք հաճախորդին՝ համաձայն նույնականացման ընթացակարգի։", "Պարզեք արգելափակման պատճառը և տեսակը՝ ժամանակավոր կամ վերջնական։", "Իրականացրեք արգելափակումը համակարգում։", "Հաստատեք հաճախորդին, որ քարտն արգելափակված է։", "Անհրաժեշտության դեպքում առաջարկեք պատվիրել նոր քարտ։"] },
+    { h: "Կարևոր", p: "Վերջնական արգելափակումից առաջ հստակ տեղեկացրեք հաճախորդին դրա հետևանքների մասին։" },
+    { h: "Թարմացված կետ", p: "[Նկարագրել, թե ինչ է փոխվել ընթացակարգում]" } ] },
+  { by: "[Անվտանգության բաժին]", intro: "Նույնականացումը պարտադիր է ցանկացած գործողությունից կամ գաղտնի տվյալ տրամադրելուց առաջ։", blocks: [
+    { h: "Մասնաճյուղում", ol: ["Խնդրեք անձը հաստատող փաստաթուղթ։", "Համեմատեք փաստաթղթի տվյալները համակարգում առկա տվյալների հետ։", "Արձանագրեք նույնականացման արդյունքը։"] },
+    { h: "Կոնտակտային կենտրոնում", ol: ["Խնդրեք հաճախորդին պատասխանել վերահսկիչ հարցերին։", "Համեմատեք պատասխանները համակարգում առկա տվյալների հետ։", "Արձանագրեք նույնականացման արդյունքը։"] },
+    { h: "Եթե նույնականացումը չի հաջողվել", p: "Չտրամադրեք գաղտնի տվյալներ և չկատարեք գործողություն։ Առաջարկեք հաճախորդին այցելել մասնաճյուղ՝ անձը հաստատող փաստաթղթով։" } ] },
+  { by: "[Վարկավորման բաժին]", intro: "Ընթացակարգը նկարագրում է վարկային դիմումի ընդունման քայլերը մասնաճյուղում։", blocks: [
+    { h: "Քայլեր", ol: ["Պարզեք վարկի նպատակը և հաճախորդի կարիքը։", "Ներկայացրեք համապատասխան վարկատեսակները (տես Պրոդուկտներ/ծառայություններ բաժինը)։", "Հավաքեք պահանջվող փաստաթղթերը՝ [փաստաթղթերի ցանկ՝ ըստ վարկատեսակի]։", "Լրացրեք դիմումը համակարգում։", "Փոխանցեք դիմումը վարկային մասնագետին։", "Տեղեկացրեք հաճախորդին հաջորդ քայլերի և պատասխանի ժամկետի մասին՝ [ժամկետ]։"] },
+    { h: "Ուշադրություն", p: "Մի խոստացեք վարկի հաստատում կամ պայմաններ մինչև վարկային մասնագետի եզրակացությունը։" } ] },
+  { by: "[Մարքեթինգի բաժին]", intro: "Աշնանային շրջանում քարտապանների համար գործում է հատուկ առաջարկ։ Ստորև ներկայացված է այն, ինչ պետք է իմանաք՝ հաճախորդներին ճիշտ տեղեկացնելու համար։", blocks: [
+    { h: "Ում համար է", p: "[Քարտերի տեսակներ, որոնց վրա տարածվում է առաջարկը]" },
+    { h: "Ժամկետ", p: "[Սկիզբ] – [ավարտ]" },
+    { h: "Պայմաններ", ul: ["[Առաջարկի բովանդակություն]", "[Սահմանափակումներ կամ բացառություններ]"] },
+    { h: "Ինչ ասել հաճախորդին", ol: ["Հարցրեք, արդյոք հաճախորդն ունի համապատասխան քարտ։", "Ներկայացրեք առաջարկի էությունը և ժամկետը։", "Նշեք պայմանները և սահմանափակումները։", "Անհրաժեշտության դեպքում ուղղորդեք համապատասխան ծառայությանը։"] } ] },
+  { by: "[Ավանդների և խնայողությունների բաժին]", intro: "Փոխվել են ավանդների պայմանները։ Նոր պայմանները ուժի մեջ են մտնում [ամսաթիվ]-ից։", blocks: [
+    { h: "Ինչ է փոխվել", ul: ["[Փոփոխություն 1]", "[Փոփոխություն 2]"] },
+    { h: "Ում վրա է տարածվում", p: "[Նոր և/կամ գործող ավանդատուներ]" },
+    { h: "Ինչպես ներկայացնել հաճախորդին", ol: ["Նշեք, որ պայմանները փոխվել են։", "Ներկայացրեք նոր պայմանները՝ ըստ ավանդի տեսակի։", "Ավանդի ընթացիկ պայմանների համար ուղղորդեք բանկի կայքի համապատասխան էջ։"] } ] },
+  { by: "[Մարքեթինգի բաժին]", intro: "Բանկում գործող բոլոր ակցիաների ամփոփ ցանկը՝ մեկ վայրում։", blocks: [
+    { h: "Ցանկ", ul: ["[Ակցիայի անվանում] — [ժամկետ] — [ում համար]", "[Ակցիայի անվանում] — [ժամկետ] — [ում համար]", "[Ակցիայի անվանում] — [ժամկետ] — [ում համար]"] },
+    { h: "Ինչպես օգտվել", p: "Յուրաքանչյուր ակցիայի լրիվ պայմանները բացվում են առանձին էջում։" } ] },
+  { by: "[Գործառնական բաժին]", intro: "Տեղեկացնում ենք, որ փոխվում է [մասնաճյուղի/ստորաբաժանման] աշխատանքային ժամանակացույցը։", blocks: [
+    { h: "Նոր ժամանակացույց", ul: ["Աշխատանքային օրեր՝ [օրեր]", "Աշխատանքային ժամեր՝ [ժամեր]", "Ուժի մեջ է մտնում՝ [ամսաթիվ]"] },
+    { h: "Ինչ անել", ol: ["Տեղեկացրեք հաճախորդներին նոր ժամանակացույցի մասին։", "Հարցերի դեպքում դիմեք անմիջական ղեկավարին։"] } ] },
+  { by: "[Գործընթացների կառավարում]", intro: "Ներդրվում է նոր ընթացակարգ՝ [ընթացակարգի անվանում]։ Հուշագիրը ամփոփում է փոփոխությունների էությունը։", blocks: [
+    { h: "Ինչ է փոխվում", ul: ["[Փոփոխություն 1]", "[Փոփոխություն 2]"] },
+    { h: "Ուժի մեջ մտնելու ամսաթիվ", p: "[Ամսաթիվ]" },
+    { h: "Ինչ պետք է անեք", ol: ["Ծանոթացեք նոր ընթացակարգի լրիվ տեքստին (Ընթացակարգեր բաժին)։", "Կիրառեք այն սահմանված ամսաթվից։", "Հարցերի դեպքում դիմեք անմիջական ղեկավարին։"] } ] },
+  { by: "[Գրասենյակի կառավարում]", intro: "Ներքին հրամանների և որոշումների արխիվ։", blocks: [
+    { h: "Վերջին հրամանները", ul: ["Հրաման №[համար] — [թեմա] — [ամսաթիվ]", "Հրաման №[համար] — [թեմա] — [ամսաթիվ]", "Հրաման №[համար] — [թեմա] — [ամսաթիվ]"] },
+    { h: "Որոնում", p: "Արխիվում կարելի է որոնել թեմայով կամ համարով՝ վերևի որոնման դաշտի միջոցով։" } ] },
+  { by: "[IT բաժին]", intro: "Այսօր նախատեսված են պլանային տեխնիկական աշխատանքներ։ Ստորև նշված են ազդեցությունը և անհրաժեշտ գործողությունները։", blocks: [
+    { h: "Ժամանակահատված", p: "[Սկիզբ] – [ավարտ]" },
+    { h: "Ինչ համակարգեր են ազդվում", ul: ["[Համակարգ 1]", "[Համակարգ 2]"] },
+    { h: "Ինչ անել", ol: ["Տեղեկացրեք հաճախորդներին հնարավոր սահմանափակումների մասին։", "Ժամանակավոր անհասանելիության դեպքում առաջարկեք փորձել աշխատանքների ավարտից հետո։", "Անսպասելի խնդրի դեպքում դիմեք տեխնիկական աջակցությանը՝ [կոնտակտ]։"] } ] },
+  { by: "[IT բաժին]", intro: "Քայլեր, երբ չի ստացվում մուտք գործել աշխատանքային համակարգ։", blocks: [
+    { h: "Քայլեր", ol: ["Ստուգեք, որ ճիշտ եք մուտքագրում օգտանունն ու գաղտնաբառը և անջատված է Caps Lock-ը։", "Փորձեք նորից մի քանի րոպե հետո։", "Ստուգեք՝ արդյոք այդ պահին նախատեսված են տեխնիկական աշխատանքներ (Համակարգեր/տեխնիկական խնդիրներ բաժին)։", "Եթե խնդիրը մնում է, դիմեք տեխնիկական աջակցությանը՝ նշելով համակարգի անունը և սխալի տեքստը։"] },
+    { h: "Աջակցության կոնտակտ", p: "[Կոնտակտային տվյալներ]" } ] },
+  { by: "[IT բաժին]", intro: "Տարածված սխալների ցանկ՝ լուծումներով։", blocks: [
+    { h: "Սխալներ և լուծումներ", ul: ["[Սխալի տեքստ 1] — [լուծում]", "[Սխալի տեքստ 2] — [լուծում]", "[Սխալի տեքստ 3] — [լուծում]"] },
+    { h: "Չկա՞ ձեր սխալը ցանկում", p: "Հարցրեք Assistant-ին կամ դիմեք տեխնիկական աջակցությանը։" } ] },
+  { by: "[Մարքեթինգի բաժին]", intro: "Ամառային առաջարկը ավարտվել է։ Տեղեկատվությունը պահպանված է հղումային նպատակով՝ հաճախորդի հարցերին պատասխանելու համար։", blocks: [
+    { h: "Ում համար էր", p: "[Քարտերի տեսակներ, որոնց վրա տարածվում էր առաջարկը]" },
+    { h: "Ժամկետ", p: "[Սկիզբ] – [ավարտ]՝ ավարտված է" },
+    { h: "Պայմաններ", ul: ["[Առաջարկի բովանդակություն]", "[Սահմանափակումներ կամ բացառություններ]"] },
+    { h: "Ինչ ասել հաճախորդին", ol: ["Տեղեկացրեք, որ առաջարկը այլևս չի գործում։", "Ներկայացրեք ներկայումս գործող համանման առաջարկները (տես Արշավներ/առաջարկներ բաժինը)։"] } ] },
+];
+INFO.forEach((x, i) => {
+  x.body = BODY[i];
+  x.text = [BODY[i].intro, ...BODY[i].blocks.flatMap((b) => [b.h, b.p, ...(b.ul || []), ...(b.ol || [])])].filter(Boolean).join(" ");
+});
+
+const ALL = [...PRODUCTS, ...INFO];
+const state = { view: "home", cat: "cards", q: "", saved: new Set(), detail: null, back: null, status: "Բոլորը", approved: false };
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const star = (id) => `<button class="star ${state.saved.has(id) ? "on" : ""}" data-star="${id}" aria-label="Պահպանել"><svg class="i"><use href="#i-star"/></svg></button>`;
+
+/* ---- end-of-day digest (sample data) ----
+   Idea: the Assistant sees every question an agent asks. At the end of the day it groups them into
+   pain points and writes a training plan, visible to the agent and to the supervisor. */
+const findId = (name) => (ALL.find((x) => x.name === name) || {}).id;
+const THEMES = {
+  card: { theme: "Քարտի արգելափակում", qs: ["Ինչպե՞ս արգելափակել քարտը, եթե հաճախորդը կորցրել է այն", "Ո՞րն է ժամանակավոր և վերջնական արգելափակման տարբերությունը", "Արգելափակումից հետո ինչպե՞ս պատվիրել նոր քարտ"],
+    why: "Նույն թեմայով հարցերը կրկնվել են օրվա ընթացքում. ընթացակարգի քայլերն ամբողջությամբ հստակ չեն։",
+    plan: [["Կարդալ", "Քարտի արգելափակման ընթացակարգը", 10, "n0"], ["Կարճ թեստ", "5 հարց արգելափակման քայլերի մասին", 5], ["Պրակտիկա", "Արգելափակման դեպք՝ գործընկերոջ հետ", 15]] },
+  mortgage: { theme: "Հիփոթեքի պայմաններ", qs: ["Ի՞նչ տարբերություն կա առաջնային և երկրորդային շուկայի հիփոթեքի միջև", "Ի՞նչ փաստաթղթեր են պետք հիփոթեքի համար", "Հնարավո՞ր է հիփոթեք առանց եկամտի ստուգման"],
+    why: "Հարցերը վերաբերում են տարբեր հիփոթեքային պրոդուկտների պայմանների համեմատությանը։",
+    plan: [["Կարդալ", "Հիփոթեքային պրոդուկտների ակնարկ", 15, findId("Հիփոթեքային վարկ առաջնային շուկայի համար")], ["Կարճ թեստ", "Ո՞ր պրոդուկտն է հարմար հաճախորդին՝ 4 իրավիճակ", 10], ["Պրակտիկա", "Հիփոթեքի խորհրդատվություն՝ դերային խաղ", 15]] },
+  login: { theme: "Մուտքի խնդիրներ համակարգում", qs: ["Համակարգը չի ընդունում գաղտնաբառը, ի՞նչ անել", "Որտե՞ղ տեսնել՝ այսօր տեխնիկական աշխատանքներ կան", "Ում դիմել մուտքի սխալի դեպքում"],
+    why: "Մուտքի խնդիրները ընդհատում են հաճախորդի սպասարկումը։",
+    plan: [["Կարդալ", "Մուտքի խնդրի լուծման քայլերը", 5, "n10"], ["Կարդալ", "Հաճախ հանդիպող սխալները", 5, "n11"]] },
+  campaign: { theme: "Արշավների պայմաններ", qs: ["Ո՞ր քարտերի վրա է տարածվում աշնանային առաջարկը", "Մինչև ե՞րբ է գործում առաջարկը"],
+    why: "Ակտիվ արշավների պայմանները դժվար են հիշվում։",
+    plan: [["Կարդալ", "Աշնանային առաջարկի պայմանները", 5, "n3"], ["Կարճ թեստ", "3 հարց ակտիվ արշավների մասին", 5]] },
+  loandocs: { theme: "Վարկային դիմումի փաստաթղթեր", qs: ["Ի՞նչ փաստաթղթեր են պետք սպառողական վարկի համար", "Ինչպե՞ս լրացնել դիմումը համակարգում"],
+    why: "Անորոշություն դիմումի ընդունման քայլերի և փաստաթղթերի ցանկի վերաբերյալ։",
+    plan: [["Կարդալ", "Վարկային դիմումի ընդունման ընթացակարգը", 10, "n2"], ["Պրակտիկա", "Դիմումի լրացում՝ գործընկերոջ հետ", 15]] },
+};
+// Sample day: [theme, number of questions] per agent, most frequent first.
+const TEAM = [
+  { name: "Մասնագետ Ա.", role: "Հաճախորդի մենեջեր", pains: [["card", 5], ["mortgage", 4], ["login", 3], ["campaign", 2]] },
+  { name: "Մասնագետ Բ.", role: "Վարկային մասնագետ", pains: [["loandocs", 5], ["mortgage", 3], ["card", 3]] },
+  { name: "Մասնագետ Գ.", role: "Սպասարկման մասնագետ", pains: [["card", 4], ["campaign", 3], ["login", 2]] },
+  { name: "Մասնագետ Դ.", role: "Թվային խորհրդատու", pains: [["login", 6], ["card", 3], ["loandocs", 3]] },
+  { name: "Մասնագետ Ե.", role: "Մասնագետ-գանձապահ", pains: [["mortgage", 4], ["campaign", 2], ["loandocs", 2]] },
+];
+const total = (a) => a.pains.reduce((s, p) => s + p[1], 0);
+const planMin = (key) => THEMES[key].plan.reduce((s, p) => s + p[2], 0);
+const planRows = (key) => THEMES[key].plan.map(([type, text, m, link]) =>
+  `<div class="plan-row"><span class="badge b-sample">${type}</span><span>${link ? `<button class="link" data-open="${link}">${esc(text)}</button>` : esc(text)}</span><span class="plan-min">${m} րոպե</span></div>`).join("");
+const digestBadges = `<span class="ai-badge">AI</span> <span class="badge b-sample">Նմուշ</span>`;
+
+function digestAgent() {
+  const a = TEAM[0], n = total(a), max = a.pains[0][1];
+  const top3 = a.pains.slice(0, 3);
+  const mins = top3.reduce((s, p) => s + planMin(p[0]), 0);
+  return `<div class="section-title"><h3>Օրվա ամփոփումս ${digestBadges}</h3><span>Ստեղծվում է ավտոմատ՝ օրվա վերջում</span></div>
+    <div class="panel intro-panel">Այսօր Assistant-ին տվել եք <b>${n} հարց</b>։ Ստորև ներկայացված են թեմաները, որտեղ առավել հաճախ օգնության կարիք եք ունեցել, և վաղվա համար առաջարկվող վերապատրաստման պլանը։ Այս ամփոփումը տեսնում եք դուք և ձեր ղեկավարը։</div>
+    <div class="section-title"><h3>Հիմնական դժվարությունները</h3></div>
+    ${a.pains.map(([k, c], i) => { const t = THEMES[k]; return `<div class="pain">
+      <div class="top"><span class="rank">${i + 1}</span><b>${esc(t.theme)}</b><span class="grow"></span><span class="desc">${c} հարց</span></div>
+      <div class="meter"><i style="width:${Math.round((c / max) * 100)}%"></i></div>
+      <ul>${t.qs.slice(0, Math.min(3, c)).map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
+      <div class="ai-note"><b>AI-ի դիտարկումը.</b> ${esc(t.why)}</div></div>`; }).join("")}
+    <div class="section-title"><h3>Վերապատրաստման պլան վաղվա համար</h3><span>Ընդհանուր՝ ${mins} րոպե</span></div>
+    ${top3.map(([k], i) => `<div class="panel"><div class="top"><span class="rank">${i + 1}</span><b>${esc(THEMES[k].theme)}</b><span class="grow"></span><span class="desc">${planMin(k)} րոպե</span></div>${planRows(k)}</div>`).join("")}`;
+}
+
+function digestTeam() {
+  const sums = {};
+  TEAM.forEach((a) => a.pains.forEach(([k, c]) => { sums[k] = (sums[k] || 0) + c; }));
+  const ranked = Object.entries(sums).sort((x, y) => y[1] - x[1]);
+  const all = ranked.reduce((s, r) => s + r[1], 0);
+  const [topKey, topCount] = ranked[0];
+  const group = TEAM.filter((a) => (a.pains.find((p) => p[0] === topKey) || [0, 0])[1] >= 3);
+  return `<div class="section-title"><h3>Թիմի օրվա ամփոփում ${digestBadges}</h3><span>Ղեկավարի տեսք</span></div>
+    <div class="stats">
+      <div class="stat"><b>${all}</b><span>հարց Assistant-ին</span></div>
+      <div class="stat"><b>${TEAM.length}</b><span>մասնագետ</span></div>
+      <div class="stat"><b>${esc(THEMES[topKey].theme)}</b><span>ամենահաճախ թեման (${topCount} հարց)</span></div>
+    </div>
+    <div class="panel"><b>Թիմի հիմնական դժվարությունները</b>
+      ${ranked.map(([k, c]) => `<div class="bar-row"><span>${esc(THEMES[k].theme)}</span><div class="meter"><i style="width:${Math.round((c / topCount) * 100)}%"></i></div><span class="desc">${c}</span></div>`).join("")}</div>
+    <div class="section-title"><h3>Մասնագետներ</h3></div>
+    <div class="tablewrap"><table class="team"><thead><tr><th>Մասնագետ</th><th>Հարցեր</th><th>Հիմնական դժվարությունը</th><th>Անհատական պլան</th></tr></thead><tbody>
+      ${TEAM.map((a) => { const k = a.pains[0][0]; return `<tr><td><b>${esc(a.name)}</b><br><span class="desc">${esc(a.role)}</span></td><td>${total(a)}</td><td>${esc(THEMES[k].theme)} <span class="desc">(${a.pains[0][1]})</span><br><span class="desc">${a.pains.slice(1, 3).map(([kk, c]) => esc(THEMES[kk].theme) + " (" + c + ")").join(", ")}</span></td><td>${planMin(k)} րոպե՝ ${THEMES[k].plan.map((p) => p[0].toLowerCase()).join(", ")}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <div class="section-title"><h3>Առաջարկվող պլան</h3></div>
+    <div class="panel">
+      <p><b>Խմբային 20-րոպեանոց քննարկում՝ «${esc(THEMES[topKey].theme)}»</b><br><span class="desc">Մասնակիցներ՝ ${group.map((a) => esc(a.name)).join(", ")} (3 և ավելի հարց այս թեմայով)։</span></p>
+      <p><b>Անհատական պլաններ</b><br><span class="desc">Յուրաքանչյուր մասնագետ ստանում է իր երեք հիմնական թեմաների համար պլան՝ իր էջում («Օրվա ամփոփում»)։</span></p>
+      <button class="btn${state.approved ? " done" : ""}" data-approve>${state.approved ? "✓ Պլանը հաստատված է և ուղարկված" : "Հաստատել պլանը և ուղարկել մասնագետներին"}</button>
+    </div>`;
+}
+
+function tile(it) {
+  const [sl, sc] = SRC[it.src];
+  const where = it.kind === "product" ? CATS[it.cat] + (it.group ? " · " + it.group : "") : SECTION_NAMES[it.section];
+  return `<div class="tile${it.expired ? " expired" : ""}">
+    <div class="row"><button class="name-btn" data-open="${it.id}">${esc(it.name)}</button>${star(it.id)}</div>
+    ${it.desc ? `<div class="desc">${esc(it.desc)}</div>` : ""}
+    <div class="meta"><span class="desc">${esc(where)}</span></div>
+    <div class="meta"><span class="badge ${sc}">${sl}</span>${it.tag ? `<span class="badge ${it.tag[1]}">${it.tag[0]}</span>` : ""}${it.sample ? `<span class="badge b-sample">Նմուշ</span>` : ""}</div>
+    <div class="actions"><button class="link" data-open="${it.id}">Բացել</button><button class="link" data-ask="${it.id}">Հարցնել Assistant-ին</button></div>
+  </div>`;
+}
+
+function blocks(bs) {
+  return bs.map((b) => `${b.h ? `<h3>${esc(b.h)}</h3>` : ""}${b.p ? `<p>${esc(b.p)}</p>` : ""}${b.ul ? `<ul>${b.ul.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${b.ol ? `<ol>${b.ol.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}`).join("");
+}
+
+// Full-information page: site items point to the website, internal items open as text in the hub.
+function detail(it) {
+  const [sl, sc] = SRC[it.src];
+  const where = it.kind === "product" ? CATS[it.cat] + (it.group ? " · " + it.group : "") : SECTION_NAMES[it.section];
+  let main;
+  if (it.kind === "product") {
+    const related = PRODUCTS.filter((p) => p.cat === it.cat && p.group === it.group && p.id !== it.id).slice(0, 6);
+    main = `${it.desc ? `<p class="intro">${esc(it.desc)}</p>` : ""}
+      <div class="srcbox"><div class="t">Ամբողջական տեղեկատվությունը՝ բանկի կայքում</div>
+        <a class="btn" href="#" data-site><svg class="i"><use href="#i-ext"/></svg>Բացել ameriabank.am-ում</a>
+        <div class="note">Մակետում այս կոճակը ցույց է տալիս, թե ինչպես կլինի կայքի էջի հղումը։</div></div>
+      ${related.length ? `<div class="related"><div class="group-label">Նույն բաժնի այլ պրոդուկտներ</div><div class="chips">${related.map((r) => `<button class="chip" data-open="${r.id}">${esc(r.name)}</button>`).join("")}</div></div>` : ""}`;
+  } else {
+    const b = it.body;
+    main = `<dl class="mail"><dt>Բաժին</dt><dd>${esc(SECTION_NAMES[it.section])}</dd>${it.section === "campaigns" && it.tag ? `<dt>Կարգավիճակ</dt><dd class="${it.expired ? "dd-expired" : ""}">${it.tag[0]}</dd>` : ""}<dt>Հրապարակող</dt><dd>${esc(b.by)}</dd><dt>Ում համար</dt><dd>${esc(ALL_STAFF)}</dd><dt>Թարմացվել է</dt><dd>[ամսաթիվ]</dd></dl>
+      <p class="intro">${esc(b.intro)}</p>${blocks(b.blocks)}
+      <div class="samplenote">Նմուշային բովանդակություն։ Իրական հարթակում այստեղ կցուցադրվի ամբողջական տեքստը։</div>`;
+  }
+  return `<div class="crumbs"><button class="link" data-back>← Հետ</button><span>/</span><span>${esc(where)}</span></div>
+    <article class="doc">
+      <h2>${esc(it.name)}</h2>
+      <div class="meta-row"><span class="badge ${sc}">${sl}</span>${it.tag ? `<span class="badge ${it.tag[1]}">${it.tag[0]}</span>` : ""}${it.sample ? `<span class="badge b-sample">Նմուշ</span>` : ""}<span class="grow"></span>${star(it.id)}<button class="link" data-ask="${it.id}">Հարցնել Assistant-ին</button></div>
+      ${main}
+    </article>`;
+}
+
+function openItem(id) {
+  if (!state.detail) state.back = { view: state.view, q: state.q, cat: state.cat };
+  state.detail = id; state.q = "";
+  render(); $(".main").scrollTop = 0;
+}
+
+function hero() {
+  return `<div class="hero">
+    <h2>Բարի օր։ Ի՞նչ տեղեկատվություն եք փնտրում</h2>
+    <p>Պրոդուկտներ, ընթացակարգեր, արշավներ, ներքին նամակագրություններ և համակարգային տեղեկություններ՝ մեկ վայրում։</p>
+    <div class="searchbox"><svg class="i"><use href="#i-search"/></svg>
+      <input id="q-hero" type="search" value="${esc(state.q)}" placeholder="Օրինակ՝ քարտի արգելափակում, Overdraft, հիփոթեք…" aria-label="Որոնել" /></div>
+    <div class="chips">${Object.entries(SECTION_NAMES).map(([k, v]) => `<button class="chip" data-view="${k}">${v}</button>`).join("")}</div>
+  </div>`;
+}
+
+function catalog() {
+  const items = PRODUCTS.filter((p) => p.cat === state.cat);
+  const groups = [...new Set(items.map((p) => p.group))];
+  return `<div class="section-title"><h3>Պրոդուկտներ</h3><span>Աղբյուր՝ ameriabank.am</span></div>
+    <div class="tabs">${Object.entries(CATS).map(([k, v]) => `<button data-cat="${k}" class="${k === state.cat ? "active" : ""}">${v}</button>`).join("")}</div>
+    ${groups.map((g) => `${g ? `<div class="group-label">${esc(g)}</div>` : ""}<div class="grid">${items.filter((p) => p.group === g).map(tile).join("")}</div>`).join("")}`;
+}
+
+function newStrip() {
+  return `<div class="section-title"><h3>Նոր և կարևոր</h3><span>Բոլոր աղբյուրներից՝ մեկ հոսքում</span></div>
+    <div class="newgrid">${INFO.filter((i) => i.news).map(tile).join("")}</div>`;
+}
+
+function render() {
+  const c = $("#content");
+  if (state.q.trim()) state.detail = null;
+  const open = state.detail && ALL.find((x) => x.id === state.detail);
+  if (open) {
+    c.innerHTML = detail(open);
+  } else if (state.q.trim()) {
+    const q = state.q.trim().toLowerCase();
+    const hits = ALL.filter((x) => x.name.toLowerCase().includes(q) || (x.desc || "").toLowerCase().includes(q) || (x.text || "").toLowerCase().includes(q));
+    c.innerHTML = hero() + `<div class="section-title"><h3>Որոնման արդյունքներ</h3><span>${hits.length} արդյունք</span></div>` +
+      (hits.length ? `<div class="grid">${hits.map(tile).join("")}</div>`
+        : `<div class="empty">«${esc(state.q)}»-ի համար արդյունք չգտնվեց։<br><button class="link" data-askq="${esc(state.q)}">Հարցնել Assistant-ին</button></div>`);
+  } else if (state.view === "home") {
+    c.innerHTML = hero() + newStrip() + catalog();
+  } else if (state.view === "products") {
+    c.innerHTML = hero() + catalog();
+  } else if (state.view === "mydigest") {
+    c.innerHTML = digestAgent();
+  } else if (state.view === "team") {
+    c.innerHTML = digestTeam();
+  } else if (state.view === "saved") {
+    const s = ALL.filter((x) => state.saved.has(x.id));
+    c.innerHTML = `<div class="section-title"><h3>Պահպանվածներ</h3></div>` +
+      (s.length ? `<div class="grid">${s.map(tile).join("")}</div>` : `<div class="empty">Դեռ պահպանված նյութեր չկան։ Աստղանիշով նշեք ցանկացած հոդված՝ այստեղ արագ գտնելու համար։</div>`);
+  } else {
+    const inView = INFO.filter((i) => i.section === state.view);
+    const isCamp = state.view === "campaigns";
+    const statuses = ["Բոլորը", "Ակտիվ", "Նոր", "Ավարտված"];
+    const countOf = (s) => (s === "Բոլորը" ? inView.length : inView.filter((i) => i.tag && i.tag[0] === s).length);
+    const shown = isCamp && state.status !== "Բոլորը" ? inView.filter((i) => i.tag && i.tag[0] === state.status) : inView;
+    c.innerHTML = `<div class="section-title"><h3>${SECTION_NAMES[state.view]}</h3><span>Նմուշային բովանդակություն</span></div>
+      ${isCamp ? `<div class="tabs">${statuses.map((s) => `<button data-status="${s}" class="${s === state.status ? "active" : ""}">${s} (${countOf(s)})</button>`).join("")}</div>` : ""}
+      <div class="grid">${shown.map(tile).join("")}</div>`;
+  }
+  const activeView = open ? open.section : state.view;
+  document.querySelectorAll(".nav button").forEach((b) => b.classList.toggle("active", b.dataset.view === activeView));
+  $("#q-top").value = state.q;
+  bindContent();
+}
+
+function bindContent() {
+  const hero = $("#q-hero");
+  if (hero) hero.addEventListener("input", (e) => { state.q = e.target.value; rerenderKeepFocus("#q-hero"); });
+  document.querySelectorAll("#content [data-view]").forEach((b) => b.addEventListener("click", () => go(b.dataset.view)));
+  document.querySelectorAll("#content [data-cat]").forEach((b) => b.addEventListener("click", () => { state.cat = b.dataset.cat; render(); }));
+  document.querySelectorAll("#content [data-status]").forEach((b) => b.addEventListener("click", () => { state.status = b.dataset.status; render(); }));
+  document.querySelectorAll("#content [data-star]").forEach((b) => b.addEventListener("click", () => { const id = b.dataset.star; state.saved.has(id) ? state.saved.delete(id) : state.saved.add(id); render(); }));
+  document.querySelectorAll("#content [data-open]").forEach((b) => b.addEventListener("click", () => openItem(b.dataset.open)));
+  document.querySelectorAll("#content [data-back]").forEach((b) => b.addEventListener("click", () => {
+    const back = state.back; state.detail = null; state.back = null;
+    if (back) { state.view = back.view; state.q = back.q; state.cat = back.cat; }
+    render(); $(".main").scrollTop = 0;
+  }));
+  document.querySelectorAll("#content [data-site]").forEach((b) => b.addEventListener("click", (e) => e.preventDefault()));
+  document.querySelectorAll("#content [data-approve]").forEach((b) => b.addEventListener("click", () => { state.approved = !state.approved; render(); }));
+  document.querySelectorAll("#content [data-ask]").forEach((b) => b.addEventListener("click", () => { const it = ALL.find((x) => x.id === b.dataset.ask); openChat(); ask("Պատմիր «" + it.name + "»-ի մասին"); }));
+  document.querySelectorAll("#content [data-askq]").forEach((b) => b.addEventListener("click", () => { openChat(); ask(b.dataset.askq); }));
+}
+
+function rerenderKeepFocus(sel) {
+  const pos = $(sel).selectionStart;
+  render();
+  const el = $(sel) || $("#q-top");
+  el.focus(); try { el.setSelectionRange(pos, pos); } catch {}
+}
+
+function go(view) { state.view = view; state.q = ""; state.detail = null; state.back = null; render(); $(".main").scrollTop = 0; }
+document.querySelectorAll(".nav button").forEach((b) => b.addEventListener("click", () => go(b.dataset.view)));
+$("#q-top").addEventListener("input", (e) => { state.q = e.target.value; rerenderKeepFocus("#q-top"); });
+$("#cmd-refresh").addEventListener("click", render);
+
+/* ---- assistant ---- */
+const SAMPLE = "Նմուշային պատասխան՝ մակետի համար";
+const KB = [
+  { keys: ["overdraft"], text: DESC["Overdraft"], sources: [{ t: "site", label: "Overdraft — ameriabank.am/en/personal/loans/consumer-loans/overdraft", href: "https://ameriabank.am/en/personal/loans/consumer-loans/overdraft" }] },
+  { keys: ["smart", "փաթեթ"], text: DESC["Smart"], sources: [{ t: "site", label: "Smart փաթեթ — ameriabank.am/en/personal/accounts/smart-account", href: "https://ameriabank.am/en/personal/accounts/smart-account" }] },
+  { keys: ["արգելափակ"], note: SAMPLE, steps: BODY[0].blocks[1].ol, sources: [{ t: "hub", label: "Քարտի արգելափակման ընթացակարգ", open: "n0" }] },
+  { keys: ["տեխնիկական", "աշխատանքներ"], note: SAMPLE, text: "Այսօր նախատեսված են պլանային տեխնիկական աշխատանքներ։ Մանրամասները նշված են համապատասխան հայտարարության մեջ։", sources: [{ t: "hub", label: "Պլանային տեխնիկական աշխատանքներ", open: "n9" }] },
+];
+const SUGGEST = ["Ի՞նչ է Overdraft-ը", "Ի՞նչ է ներառում Smart փաթեթը", "Ինչպե՞ս արգելափակել քարտը", "Կան տեխնիկական աշխատանքներ այսօր"];
+const FALLBACK = "Մակետում ամբողջական պատասխան չկա այս հարցի համար։ Իրական Assistant-ը կպատասխանի բանկի կայքի և ներքին փաստաթղթերի հիման վրա՝ միշտ նշելով աղբյուրը։ Փորձեք ստորև առաջարկվող հարցերը։";
+
+function addMsg(kind, html) {
+  const m = document.createElement("div");
+  m.className = "msg " + kind; m.innerHTML = html;
+  $("#msgs").appendChild(m); $("#msgs").scrollTop = $("#msgs").scrollHeight;
+  return m;
+}
+
+function ask(q) {
+  const u = addMsg("user", ""); u.textContent = q;
+  const low = q.toLowerCase();
+  const hit = KB.find((k) => k.keys.some((w) => low.includes(w)));
+  if (!hit) { addMsg("bot", esc(FALLBACK)); return; }
+  const body = hit.steps ? `<ol>${hit.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : esc(hit.text);
+  const srcs = hit.sources.map((s) => `<div class="row"><span class="badge ${SRC[s.t][1]}">${SRC[s.t][0]}</span>${s.href ? `<a href="${s.href}" target="_blank" rel="noopener">${esc(s.label)}</a>` : s.open ? `<button class="link" data-open="${s.open}">${esc(s.label)}</button>` : `<span>${esc(s.label)}</span>`}</div>`).join("");
+  const m = addMsg("bot", `${hit.note ? `<span class="badge b-sample">${hit.note}</span><br>` : ""}${body}
+    <div class="src">Աղբյուր${srcs}</div>
+    <div class="fb"><button data-fb>Ճիշտ էր</button><button data-fb>Սխալ էր</button><button data-fb>Հարցնել գործընկերոջը</button></div>`);
+  m.querySelectorAll("[data-fb]").forEach((b) => b.addEventListener("click", () => { m.querySelectorAll("[data-fb]").forEach((x) => x.classList.remove("done")); b.classList.add("done"); }));
+  m.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openItem(b.dataset.open)));
+}
+
+function openChat() { $("#chat").hidden = false; $("#body").classList.add("with-chat"); $("#fab").hidden = true; }
+function closeChat() { $("#chat").hidden = true; $("#body").classList.remove("with-chat"); $("#fab").hidden = false; }
+$("#chat-min").addEventListener("click", closeChat);
+$("#fab").addEventListener("click", openChat);
+$("#composer").addEventListener("submit", (e) => { e.preventDefault(); const v = $("#chat-input").value.trim(); if (!v) return; $("#chat-input").value = ""; ask(v); });
+$("#suggest").innerHTML = SUGGEST.map((s) => `<button type="button">${esc(s)}</button>`).join("");
+$("#suggest").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent)));
+addMsg("bot", "Բարև։ Ես կարող եմ օգնել գտնել տեղեկատվություն պրոդուկտների, ընթացակարգերի և արշավների մասին։ Յուրաքանչյուր պատասխանի հետ ցույց կտամ աղբյուրը։");
+
+
+render();
+</script>
+</body>
+</html>
